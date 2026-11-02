@@ -1,0 +1,22 @@
+{
+  "name": "tikshuv-games",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "games/*"
+  ],
+  "scripts": {
+    "dev": "npm -w games/case-files run dev",
+    "build": "npm -w games/case-files run build",
+    "preview": "npm -w games/case-files run preview",
+    "typecheck": "tsc -b",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

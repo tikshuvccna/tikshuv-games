@@ -1,0 +1,4 @@
+:root { --cf-night:#1F2430; --cf-paper:#EDE3CF; --cf-brass:#C79A3B; }
+body { margin:0; background:var(--cf-night); color:var(--cf-paper); font-family:system-ui,sans-serif; font-size:18px; }
+.cf-hello { padding:2rem 16px; text-align:center; }
+.cf-hello h1 { color:var(--cf-brass); }
