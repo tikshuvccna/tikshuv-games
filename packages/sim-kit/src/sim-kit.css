@@ -1,0 +1,80 @@
+/* @tikshuv/sim-kit: tokens only, logical properties, sharp corners (pixel-ish, no rounding). */
+.sk-stage {
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--tk-surface);
+  color: var(--tk-text);
+  border: var(--tk-rule) solid var(--tk-border);
+  border-radius: var(--tk-radius-xs);
+  font-family: var(--tk-font-sans);
+  max-inline-size: 100%;
+}
+.sk-stage:focus-visible,
+.sk-btn:focus-visible,
+.sk-range:focus-visible,
+.sk-packet:focus-visible {
+  outline: 3px solid var(--tk-focus);
+  outline-offset: 2px;
+}
+.sk-svg { inline-size: 100%; block-size: auto; display: block; }
+.sk-bg { fill: var(--tk-bg-deep); }
+.sk-link { stroke: var(--tk-border-strong); stroke-width: 3; }
+.sk-link.is-active { stroke: var(--tk-accent); stroke-width: 4; }
+.sk-node__body { fill: var(--tk-surface); stroke: var(--cf-fog); stroke-width: 2; }
+.sk-node__stroke { fill: none; stroke: var(--cf-fog-light); stroke-width: 2; }
+.sk-node.is-active .sk-node__body { stroke: var(--tk-accent); fill: var(--cf-night); }
+.sk-node__label { fill: var(--tk-text); font: var(--tk-weight-bold) 14px var(--tk-font-sans); direction: ltr; unicode-bidi: isolate; }
+.sk-table__bg { fill: var(--cf-night); stroke: var(--tk-hairline-brass); stroke-width: 1; }
+.sk-table__title { fill: var(--cf-fog-light); font: var(--tk-weight-bold) 10px var(--tk-font-sans); }
+.sk-row__bg { fill: transparent; }
+.sk-row__text { fill: var(--tk-text); font: 9px var(--tk-font-mono); unicode-bidi: isolate; }
+.sk-row.is-fresh .sk-row__bg { fill: var(--cf-amber-deep); }
+.sk-row.is-fresh .sk-row__text { fill: var(--cf-paper); }
+.sk-packet__shape { stroke: var(--cf-ink); stroke-width: 2; }
+.sk-packet--frame .sk-packet__shape { fill: var(--cf-amber); }
+.sk-packet--packet .sk-packet__shape { fill: var(--cf-teal); }
+.sk-packet--arp-request .sk-packet__shape { fill: var(--cf-blue-light); }
+.sk-packet--arp-reply .sk-packet__shape { fill: var(--cf-blue); }
+.sk-packet--icmp .sk-packet__shape { fill: var(--cf-phosphor); }
+.sk-packet { cursor: pointer; }
+.sk-packet__label { fill: var(--tk-text); font: var(--tk-weight-bold) 11px var(--tk-font-mono); direction: ltr; unicode-bidi: isolate; paint-order: stroke; stroke: var(--cf-ink); stroke-width: 3px; }
+.sk-drop__x { stroke: var(--cf-rust-light); stroke-width: 4; fill: none; }
+.sk-caption { margin: 0; min-block-size: 3.2em; line-height: var(--tk-leading); font-size: var(--tk-text-md); color: var(--tk-text); }
+.sk-range { inline-size: 100%; accent-color: var(--cf-brass); min-block-size: var(--tk-target); }
+.sk-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.sk-speed { display: inline-flex; gap: 2px; margin-inline-start: auto; }
+.sk-counter { font-family: var(--tk-font-mono); font-variant-numeric: tabular-nums; color: var(--tk-text-muted-on-slate); }
+.sk-btn {
+  min-inline-size: var(--tk-target);
+  min-block-size: var(--tk-target);
+  padding-inline: 0.6rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--cf-brass);
+  color: var(--tk-text-on-accent);
+  border: 0;
+  border-radius: var(--tk-radius-xs);
+  box-shadow: var(--tk-bevel-brass);
+  font: var(--tk-weight-bold) var(--tk-text-sm) var(--tk-font-sans);
+  cursor: pointer;
+}
+.sk-btn:disabled { background: var(--cf-slate); color: var(--tk-text-muted-on-slate); box-shadow: none; cursor: default; }
+.sk-btn[aria-pressed='true'], .sk-btn[aria-expanded='true'] { background: var(--cf-amber); }
+.sk-icon { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: square; stroke-linejoin: miter; }
+/* the play/back/forward glyphs point in the reading direction */
+[dir='rtl'] .sk-stage .sk-icon, .sk-stage:dir(rtl) .sk-icon { transform: scaleX(-1); }
+.sk-pop {
+  position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem;
+  max-inline-size: 18rem; padding: 0.75rem;
+  background: var(--tk-surface-paper); color: var(--tk-text-on-paper);
+  border: var(--tk-rule) solid var(--cf-brass); border-radius: var(--tk-radius-xs);
+  box-shadow: var(--tk-shadow-paper);
+}
+.sk-pop[hidden] { display: none; }
+.sk-pop__title { display: block; margin-block-end: 0.4rem; }
+.sk-fields { display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.75rem; margin: 0 0 0.5rem; }
+.sk-fields dt { color: var(--tk-text-muted-on-paper); }
+.sk-fields dd { margin: 0; font-family: var(--tk-font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .sk-stage * { transition: none !important; animation: none !important; } }
+.sk-stage[data-reduced='true'] * { transition: none !important; animation: none !important; }

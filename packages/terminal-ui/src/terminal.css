@@ -1,0 +1,72 @@
+/* Terminal widget. Colours come only from @tikshuv/ui tokens. */
+.tkt {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  background: var(--tk-bg-deep);
+  color: var(--cf-phosphor);
+  border: 1px solid var(--tk-hairline-brass);
+  border-radius: var(--tk-radius-md);
+  font-family: var(--tk-font-mono);
+  font-size: var(--tk-text-md);
+  line-height: 1.45;
+  min-inline-size: 0;
+}
+.tkt__log {
+  flex: 1 1 auto;
+  min-block-size: 8em;
+  max-block-size: 24em;
+  overflow-y: auto;
+  padding: var(--tk-space-3);
+  margin: 0;
+  overscroll-behavior: contain;
+}
+.tkt__line { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+.tkt__line--input { color: var(--tk-text); }
+.tkt__line--list { color: var(--tk-warn); }
+.tkt__line--help { color: var(--tk-link); }
+.tkt__line--info { color: var(--tk-text-muted); }
+.tkt__prompt { color: var(--cf-phosphor); user-select: none; }
+.tkt__row {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-space-2);
+  padding: var(--tk-space-2) var(--tk-space-3);
+  border-block-start: 1px solid var(--tk-border);
+}
+.tkt__row-prompt { white-space: pre; color: var(--cf-phosphor); }
+.tkt__input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: var(--tk-target);
+  background: transparent;
+  color: var(--tk-text);
+  border: 0;
+  padding: 0;
+  font: inherit;
+  caret-color: var(--cf-phosphor);
+  direction: ltr;
+}
+.tkt__input:focus-visible { outline: 3px solid var(--tk-focus); outline-offset: 2px; }
+.tkt__chips {
+  display: flex;
+  gap: var(--tk-space-2);
+  padding: var(--tk-space-2) var(--tk-space-3);
+  overflow-x: auto;
+  border-block-start: 1px solid var(--tk-border);
+}
+.tkt__chips:empty { display: none; }
+.tkt__chip {
+  flex: 0 0 auto;
+  min-block-size: var(--tk-target);
+  padding-inline: var(--tk-space-3);
+  background: var(--tk-surface);
+  color: var(--tk-text);
+  border: 1px solid var(--tk-hairline-brass);
+  border-radius: var(--tk-radius-pill);
+  font: inherit;
+  cursor: pointer;
+}
+.tkt__chip:focus-visible { outline: 3px solid var(--tk-focus); outline-offset: 2px; }
