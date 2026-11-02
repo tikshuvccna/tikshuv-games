@@ -3,13 +3,13 @@
 Web Audio `AudioBus`: buses master / music / sfx / ambience / ui, per-bus volume and mute (persistable `AudioSettings`, sound OFF by default on first run), unlock on first gesture, music crossfade between mood tracks, ambience loop layers, SFX with music ducking (-35 percent), `setMood(mood)` and a lazy asset manifest that fails soft. Every named SFX has a procedural synth fallback, so the game is fully audible with zero files. Inject a context (`FakeAudioContext` for tests).
 
 ```ts
-const bus = new AudioBus({ settings: save.audio, onSettingsChange: (s) => save.audio = s });
+const bus = new AudioBus({ settings: save.state.settings.audio, onSettingsChange: (s) => save.update((d) => { d.settings.audio = s; }) });
 bus.unlockOnFirstGesture(window);
 bus.setManifest({ mus_bureau: { url: `${BASE}audio/mus_bureau.opus` } }); // urls come later from Flow
-bus.setMood('tense'); bus.playSfx('stamp');
+bus.setMood("mood_c1_post"); bus.playSfx('stamp');
 ```
 
-Moods: calm, tense, discovery, danger, melancholy, triumph, blackout (see `src/moods.ts`). File SFX use manifest id `sfx_<name>`.
+Moods: the 25 VOICE_BIBLE ids (mood_hub, mood_check_red, ...), see `src/moods.ts`. Settings live in `save.settings.audio` (`promptSeen` marks the first-run prompt answered).
 
 ## Assets to generate in Flow later (names only, nothing generated yet)
 

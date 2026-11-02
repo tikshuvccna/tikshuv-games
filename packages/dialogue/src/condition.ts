@@ -1,8 +1,9 @@
-/** Tiny safe condition DSL: flag:x, voice:logic>=2, ev:id, thought:id, true, false, ! && || ( ). No eval. */
+/** Tiny safe condition DSL: flag:x (or flag:x>=2 for numeric flags), voice:logic>=2, ev:id, thought:id, true, false, ! && || ( ). No eval. */
+import { VOICE_IDS } from '@tikshuv/core';
 import type { VoiceId } from './schema.js';
 
 export type Cond =
-  | { k: 'flag'; name: string }
+  | { k: 'flag'; name: string; op?: string; n?: number }
   | { k: 'voice'; voice: string; op: string; n: number }
   | { k: 'ev'; id: string }
   | { k: 'thought'; id: string }
@@ -61,13 +62,18 @@ export function parseCondition(src: string): Cond {
     const idx = t.indexOf(':');
     const kind = idx < 0 ? t : t.slice(0, idx);
     const rest = idx < 0 ? '' : t.slice(idx + 1);
-    if (kind === 'flag') return { k: 'flag', name: rest };
+    if (kind === 'flag') {
+      const fm = /^([a-z0-9_]+?)(>=|<=|==|>|<)(\d+)$/.exec(rest);
+      return fm ? { k: 'flag', name: fm[1] ?? '', op: fm[2] ?? '>=', n: Number(fm[3]) } : { k: 'flag', name: rest };
+    }
     if (kind === 'ev') return { k: 'ev', id: rest };
     if (kind === 'thought') return { k: 'thought', id: rest };
     if (kind === 'voice') {
       const m = /^([a-z0-9_]+?)(>=|<=|==|>|<)(\d+)$/.exec(rest);
       if (!m) throw new Error(`voice atom needs a comparison: "${t}"`);
-      return { k: 'voice', voice: m[1] ?? '', op: m[2] ?? '>=', n: Number(m[3]) };
+      const voice = m[1] ?? '';
+      if (!(VOICE_IDS as readonly string[]).includes(voice)) throw new Error(`unknown voice "${voice}" in "${t}"`);
+      return { k: 'voice', voice, op: m[2] ?? '>=', n: Number(m[3]) };
     }
     throw new Error(`unknown condition atom "${t}"`);
   };
@@ -89,7 +95,10 @@ function cmp(a: number, op: string, b: number): boolean {
 export function evalCondition(c: Cond, env: CondEnv): boolean {
   switch (c.k) {
     case 'const': return c.v;
-    case 'flag': return Boolean(env.flags[c.name]);
+    case 'flag': {
+      const v = env.flags[c.name];
+      return c.op === undefined ? Boolean(v) : cmp(Number(v ?? 0), c.op, c.n ?? 0);
+    }
     case 'ev': return env.evidence.has(c.id);
     case 'thought': return env.thoughts.has(c.id);
     case 'voice': return cmp(env.voices[c.voice as VoiceId] ?? 0, c.op, c.n);

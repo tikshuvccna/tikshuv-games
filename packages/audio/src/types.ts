@@ -5,6 +5,8 @@ export interface AParam {
   linearRampToValueAtTime(v: number, t: number): unknown;
   setTargetAtTime(v: number, t: number, timeConstant: number): unknown;
   cancelScheduledValues(t: number): unknown;
+  /** present in modern browsers; avoids a click when a layer is faded out mid-fade-in */
+  cancelAndHoldAtTime?(t: number): unknown;
 }
 export interface ANode {
   connect(dest: ANode): unknown;
@@ -17,6 +19,7 @@ export interface AOsc extends ANode {
   frequency: AParam;
   start(t?: number): void;
   stop(t?: number): void;
+  onended?: (() => void) | null;
 }
 export interface ABuffer { duration: number; getChannelData(ch: number): Float32Array }
 export interface ASource extends ANode {
@@ -24,6 +27,7 @@ export interface ASource extends ANode {
   loop: boolean;
   start(t?: number): void;
   stop(t?: number): void;
+  onended?: (() => void) | null;
 }
 export interface AContextLike {
   readonly currentTime: number;
@@ -31,6 +35,9 @@ export interface AContextLike {
   readonly state: string;
   readonly destination: ANode;
   resume(): Promise<void>;
+  suspend?(): Promise<void>;
+  /** fires when the context goes running / suspended / interrupted (iOS) */
+  onstatechange?: (() => void) | null;
   createGain(): AGain;
   createBiquadFilter(): AFilter;
   createOscillator(): AOsc;
@@ -44,10 +51,13 @@ export const BUS_NAMES: readonly BusName[] = ['music', 'sfx', 'ambience', 'ui'];
 
 export type SfxName =
   | 'click' | 'confirm' | 'deny' | 'stamp' | 'typewriter' | 'paper'
-  | 'notification' | 'check-pass' | 'check-fail' | 'blackout';
+  | 'notification' | 'check-pass' | 'check-fail' | 'blackout'
+  | 'level-up' | 'sparkle' | 'whoosh';
 export const SFX_NAMES: readonly SfxName[] = [
   'click', 'confirm', 'deny', 'stamp', 'typewriter', 'paper',
   'notification', 'check-pass', 'check-fail', 'blackout',
+  'level-up', 'sparkle', 'whoosh',
 ];
 
-export type MoodId = 'calm' | 'tense' | 'discovery' | 'danger' | 'melancholy' | 'triumph' | 'blackout';
+/** Scene mood ids (VOICE_BIBLE section 5); the single list lives in @tikshuv/core. */
+export type { SceneMoodId as MoodId } from '@tikshuv/core';

@@ -56,16 +56,19 @@ describe('DialogueRunner: white check', () => {
     const r = new DialogueRunner({ voices: { logic: 1 } });
     r.on((e) => events.push(e));
     r.start(sample());
-    expect(r.advance().id).toBe('miss'); // 1 + 0 evidence < 3
+    expect(r.advance().type).toBe('check'); // preview first
+    expect(r.confirm().id).toBe('miss'); // 1 + 0 evidence < 3
     const fail = events.find((e) => e.type === 'check');
     expect(fail).toMatchObject({ result: { passed: false, missing: 2 } });
     r.grantEvidence('ev_a');
     r.grantEvidence('ev_a'); // idempotent
     r.advance(); // back to n1
-    expect(r.advance().id).toBe('miss'); // 1+1=2, still short, retry allowed
+    r.advance();
+    expect(r.confirm().id).toBe('miss'); // 1+1=2, still short, retry allowed
     r.grantEvidence('ev_b');
     r.advance();
-    const v = r.advance();
+    r.advance();
+    const v = r.confirm();
     expect(v.id).toBe('ok');
     expect(r.state.ended).toBe(true);
     expect(events.at(-1)).toEqual({ type: 'end', result: 'solved' });
@@ -77,7 +80,8 @@ describe('DialogueRunner: white check', () => {
     r.start(sample());
     r.addModifier('logic', 1);
     r.setVoiceLevel('logic', 2);
-    expect(r.advance().id).toBe('ok');
+    r.advance();
+    expect(r.confirm().id).toBe('ok');
   });
 });
 
@@ -97,17 +101,19 @@ describe('DialogueRunner: red check', () => {
     const r = new DialogueRunner({ voices: { suspicion: 1 } });
     r.on((e) => events.push(e));
     r.start(red());
-    expect(r.advance().id).toBe('bad');
+    r.advance();
+    expect(r.confirm().id).toBe('bad');
     r.grantEvidence('ev_a');
     r.setVoiceLevel('suspicion', 5);
-    expect(r.advance().id).toBe('bad'); // goto n2 replays recorded failure
+    expect(r.advance().id).toBe('bad'); // goto n2 replays recorded failure silently
     expect(r.state.redResults).toEqual({ n2: false });
     expect(events.filter((e) => e.type === 'check' && e.locked)).toHaveLength(1);
   });
   it('a recorded pass replays as a pass', () => {
     const r = new DialogueRunner({ voices: { suspicion: 3 } });
     r.start(red());
-    expect(r.advance().id).toBe('ok');
+    r.advance();
+    expect(r.confirm().id).toBe('ok');
     expect(r.state.redResults).toEqual({ n2: true });
   });
 });
@@ -173,11 +179,11 @@ describe('lintScene', () => {
     const issues = lintScene(sample());
     expect(hasErrors(issues)).toBe(false);
   });
-  it('catches a dead branch (option requiring a flag nobody sets) and the node behind it', () => {
+  it('catches a dead branch (option that can never be offered) and the node behind it', () => {
     const scene = {
       schema: 1, id: 'd', speakers: {}, start: 'c',
       nodes: [
-        { id: 'c', type: 'choice', options: [{ text: 'א', next: 'e' }, { text: 'ב', next: 'secret', requires: 'flag:never_set' }] },
+        { id: 'c', type: 'choice', options: [{ text: 'א', next: 'e' }, { text: 'ב', next: 'secret', requires: 'false' }] },
         { id: 'secret', type: 'narration', text: 'סוד', next: 'e' },
         { id: 'e', type: 'end' },
       ],
@@ -200,7 +206,7 @@ describe('lintScene', () => {
     const c = codes({
       schema: 1, id: 'x', speakers: {}, start: 'c',
       nodes: [
-        { id: 'c', type: 'choice', options: [{ text: 'א', next: 'l', requires: 'false' }] },
+        { id: 'c', type: 'choice', options: [{ text: 'א', next: 'l', requires: 'false' }, { text: 'ב', next: 'l', requires: '!true' }] },
         { id: 'l', type: 'narration', text: 'x', next: 'm' },
         { id: 'm', type: 'goto', target: 'l' },
         { id: 'e', type: 'end' },
@@ -242,7 +248,7 @@ describe('lintScene', () => {
     const c = codes({
       schema: 1, id: 'q', speakers: {}, start: 'b',
       nodes: [
-        { id: 'b', type: 'branch', cases: [{ if: '!flag:no || flag:no', next: 'e' }, { if: 'flag:no && ev:x', next: 'e' }], else: 'e' },
+        { id: 'b', type: 'branch', cases: [{ if: '!false || flag:no', next: 'e' }, { if: 'false && ev:x', next: 'e' }], else: 'e' },
         { id: 'e', type: 'end' },
       ],
     });

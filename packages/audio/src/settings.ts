@@ -1,4 +1,4 @@
-import { BUS_NAMES, type BusName } from './types';
+import { BUS_NAMES, type BusName } from './types.js';
 
 export interface AudioSettings {
   master: number;
@@ -10,6 +10,8 @@ export interface AudioSettings {
   muted: Record<'master' | BusName, boolean>;
   /** shortens stingers / reduces sensory load */
   reducedSensory: boolean;
+  /** the first-run "sound on?" prompt has been answered (distinguishes first run from a chosen mute) */
+  promptSeen: boolean;
 }
 
 /** Sound is OFF by default on first run (school use, spec 04 section 6). */
@@ -18,6 +20,7 @@ export function defaultSettings(): AudioSettings {
     master: 0.8, music: 0.7, sfx: 0.9, ambience: 0.6, ui: 0.8,
     muted: { master: true, music: false, sfx: false, ambience: false, ui: false },
     reducedSensory: false,
+    promptSeen: false,
   };
 }
 
@@ -42,5 +45,6 @@ export function sanitizeSettings(raw: unknown): AudioSettings {
     ui: clamp01(r['ui'], d.ui),
     muted,
     reducedSensory: typeof r['reducedSensory'] === 'boolean' ? r['reducedSensory'] : d.reducedSensory,
+    promptSeen: typeof r['promptSeen'] === 'boolean' ? r['promptSeen'] : d.promptSeen,
   };
 }

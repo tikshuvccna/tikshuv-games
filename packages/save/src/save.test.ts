@@ -9,7 +9,7 @@ import {
   SaveV1Schema,
   type AsyncKV,
   type SyncStorage,
-} from './index';
+} from './index.js';
 
 function fakeLocal(init: Record<string, string> = {}): SyncStorage & { data: Map<string, string> } {
   const data = new Map(Object.entries(init));
@@ -28,8 +28,9 @@ function fakeBackup(): AsyncKV & { data: Map<string, string> } {
 describe('schema', () => {
   it('default validates; unit rule', () => {
     expect(SaveV1Schema.safeParse(createDefaultSave()).success).toBe(true);
-    expect(isUnitComplete({ checks: 2, quizScore: 5 })).toBe(true);
-    expect(isUnitComplete({ checks: 1, quizScore: 8 })).toBe(false);
+    expect(isUnitComplete({ lessonViewed: true, checks: 2, quizScore: 5 })).toBe(true);
+    expect(isUnitComplete({ lessonViewed: true, checks: 1, quizScore: 8 })).toBe(false);
+    expect(isUnitComplete({ lessonViewed: false, checks: 3, quizScore: 8 })).toBe(false);
   });
 });
 
@@ -41,14 +42,14 @@ describe('SaveStore', () => {
     await a.load();
     a.update((d) => {
       d.xp = 42;
-      d.voices['logic'] = 3;
-      d.units['u05'] = { checks: 2, quizScore: 6, complete: true };
+      d.voices['logic'] = { level: 3, pips: 1 };
+      d.units['u05'] = { lessonViewed: true, checks: 2, quizScore: 6 };
     });
     expect(await a.flush()).toEqual({ ok: true, mirrored: true });
     const r = await new SaveStore({ local, backup }).load();
     expect(r.source).toBe('local');
     expect(r.state.xp).toBe(42);
-    expect(r.state.voices['logic']).toBe(3);
+    expect(r.state.voices['logic']).toEqual({ level: 3, pips: 1 });
     expect(backup.data.get(SAVE_KEY)).toBe(local.data.get(SAVE_KEY));
   });
 
@@ -91,9 +92,9 @@ describe('SaveStore', () => {
     const onError = vi.fn();
     const s = new SaveStore({ local: fakeLocal(), backup: null, onError });
     s.update((d) => {
-      d.voices['x'] = 9;
+      d.voices['logic'] = { level: 9, pips: 0 };
     });
-    expect(s.getState().voices['x']).toBeUndefined();
+    expect(s.getState().voices['logic']).toBeUndefined();
     expect(onError).toHaveBeenCalled();
   });
 
@@ -106,7 +107,7 @@ describe('SaveStore', () => {
     expect(r1.source).toBe('backup');
     expect(r1.state.xp).toBe(99);
     backup.data.set(SAVE_KEY, 'garbage');
-    const r2 = await new SaveStore({ local: fakeLocal({ [SAVE_KEY]: '{"v":1}' }), backup }).load();
+    const r2 = await new SaveStore({ local: fakeLocal({ [SAVE_KEY]: '{"v":1,"xp":-5}' }), backup }).load();
     expect(r2.source).toBe('default');
     expect(r2.state.xp).toBe(0);
     expect(r2.warnings.length).toBeGreaterThan(0);

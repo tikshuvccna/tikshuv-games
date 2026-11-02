@@ -1,4 +1,4 @@
-import type { ABuffer, AContextLike } from './types';
+import type { ABuffer, AContextLike } from './types.js';
 
 export interface AssetEntry { url: string; kind?: 'music' | 'ambience' | 'sfx' }
 export type AssetManifest = Record<string, AssetEntry>;

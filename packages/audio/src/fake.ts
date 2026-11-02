@@ -1,4 +1,4 @@
-import type { AContextLike } from './types';
+import type { AContextLike } from './types.js';
 
 export interface ParamCall { kind: 'set' | 'ramp' | 'target' | 'cancel'; value?: number; time: number; tc?: number }
 
@@ -26,6 +26,7 @@ export class FakeNode {
   connect(n: FakeNode) { this.connections.push(n); return n; }
   disconnect() { this.disconnected = true; }
   start(t = 0) { this.started.push(t); }
+  onended: (() => void) | null = null;
   stop(t?: number) { this.stopped.push(t); }
 }
 
@@ -34,12 +35,17 @@ export class FakeAudioContext {
   currentTime = 0;
   sampleRate = 8000;
   state = 'suspended';
+  onstatechange: (() => void) | null = null;
+  suspendCalls = 0;
   destination = new FakeNode('destination');
   nodes: FakeNode[] = [];
   resumeCalls = 0;
   decodeFails = false;
   private mk(kind: string) { const n = new FakeNode(kind); this.nodes.push(n); return n; }
-  async resume() { this.resumeCalls++; this.state = 'running'; }
+  async resume() { this.resumeCalls++; this.setState('running'); }
+  async suspend() { this.suspendCalls++; this.setState('suspended'); }
+  /** test helper: change state and fire onstatechange like a browser would */
+  setState(s: string) { this.state = s; this.onstatechange?.(); }
   createGain() { return this.mk('gain'); }
   createBiquadFilter() { return this.mk('filter'); }
   createOscillator() { return this.mk('osc'); }

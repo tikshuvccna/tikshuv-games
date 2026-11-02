@@ -21,4 +21,7 @@ export function schedule(delay: Ms, fn: () => void): Scheduled {
 export interface Clock {
   now(): Ms;
 }
-export const systemClock: Clock = { now: () => Date.now() };
+/** Monotonic (performance.now) so wall-clock changes never move the session timer. */
+export const systemClock: Clock = {
+  now: () => (typeof performance !== 'undefined' ? performance.now() : Date.now()),
+};

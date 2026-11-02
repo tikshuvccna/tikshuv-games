@@ -1,3 +1,3 @@
-export * from './schema';
-export * from './migrations';
-export * from './store';
+export * from './schema.js';
+export * from './migrations.js';
+export * from './store.js';

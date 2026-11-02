@@ -1,6 +1,6 @@
 import { get as idbGet, set as idbSet } from 'idb-keyval';
-import { migrate, type Migration, migrations as defaultMigrations } from './migrations';
-import { CURRENT_VERSION, SaveV1Schema, createDefaultSave, type SaveV1 } from './schema';
+import { migrate, type Migration, migrations as defaultMigrations } from './migrations.js';
+import { CURRENT_VERSION, SaveV1Schema, createDefaultSave, type SaveV1 } from './schema.js';
 
 export interface SyncStorage {
   getItem(key: string): string | null;
@@ -38,6 +38,8 @@ export interface SaveStoreOptions {
   migrations?: readonly Migration[];
   latestVersion?: number;
   onError?: (msg: string, err?: unknown) => void;
+  /** another tab saved a newer state; the store has already adopted it (show a notice or re-render) */
+  onExternalChange?: (s: Readonly<SaveV1>) => void;
   setTimer?: (fn: () => void, ms: number) => unknown;
   clearTimer?: (h: unknown) => void;
 }
@@ -65,6 +67,25 @@ function isQuota(e: unknown): boolean {
   );
 }
 
+/** Merge parsed data over defaults so fields added later (or a missing nested object) never discard a save. */
+function deepMerge(base: unknown, over: unknown): unknown {
+  const plain = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+  if (!plain(base) || !plain(over)) return over === undefined ? base : over;
+  const out: Record<string, unknown> = { ...base };
+  for (const [k, v] of Object.entries(over)) out[k] = k in base ? deepMerge(base[k], v) : v;
+  return out;
+}
+
+export interface LifecycleTarget {
+  addEventListener(type: string, fn: (e: never) => void): void;
+  removeEventListener(type: string, fn: (e: never) => void): void;
+  document?: {
+    hidden: boolean;
+    addEventListener(type: string, fn: () => void): void;
+    removeEventListener(type: string, fn: () => void): void;
+  };
+}
+
 interface Parsed {
   state?: SaveV1;
   future?: boolean;
@@ -81,6 +102,7 @@ export class SaveStore {
   private readonly chain: readonly Migration[];
   private readonly latest: number;
   private readonly onError: (msg: string, err?: unknown) => void;
+  private readonly onExternalChange: ((s: Readonly<SaveV1>) => void) | undefined;
   private readonly setTimer: (fn: () => void, ms: number) => unknown;
   private readonly clearTimer: (h: unknown) => void;
   private state: SaveV1;
@@ -98,6 +120,7 @@ export class SaveStore {
     this.chain = opts.migrations ?? defaultMigrations;
     this.latest = opts.latestVersion ?? CURRENT_VERSION;
     this.onError = opts.onError ?? (() => {});
+    this.onExternalChange = opts.onExternalChange;
     this.setTimer = opts.setTimer ?? ((fn, ms) => setTimeout(fn, ms));
     this.clearTimer = opts.clearTimer ?? ((h) => clearTimeout(h as ReturnType<typeof setTimeout>));
     this.state = createDefaultSave(this.now());
@@ -126,7 +149,7 @@ export class SaveStore {
     const m = migrate(obj, this.latest, this.chain);
     if (m.status === 'future') return { future: true, error: `future version ${m.version}` };
     if (m.status === 'error') return { error: m.reason };
-    const parsed = SaveV1Schema.safeParse(m.data);
+    const parsed = SaveV1Schema.safeParse(deepMerge(createDefaultSave(this.now()), m.data));
     if (!parsed.success) return { error: 'schema: ' + parsed.error.issues[0]?.message };
     return { state: parsed.data, migrated: m.migrated };
   }
@@ -151,28 +174,81 @@ export class SaveStore {
       warnings.push('localStorage read failed');
       this.onError('localStorage read failed', e);
     }
+    let localOk: Parsed | undefined;
     if (raw !== null) {
       const r = this.parse(raw);
-      if (r.state) return adopt(r, 'local');
-      warnings.push(`local save unusable: ${r.error}`);
-      if (r.future) return defaulted(true);
+      if (r.state) localOk = r;
+      else {
+        warnings.push(`local save unusable: ${r.error}`);
+        if (r.future) return defaulted(true);
+        this.quarantine(raw); // keep the unreadable copy before the next save overwrites it
+      }
     }
     if (this.backup) {
       try {
         const braw = await this.backup.get(this.key);
         const r = this.parse(braw);
         if (r.state) {
-          warnings.push('restored from backup');
-          return adopt(r, 'backup');
+          // the mirror can be newer than localStorage when a quota error left local behind
+          if (!localOk?.state || Date.parse(r.state.updatedAt) > Date.parse(localOk.state.updatedAt)) {
+            warnings.push(localOk ? 'backup is newer than local; restored from backup' : 'restored from backup');
+            return adopt(r, 'backup');
+          }
+        } else {
+          if (braw != null) warnings.push(`backup unusable: ${r.error}`);
+          if (r.future && !localOk) return defaulted(true);
         }
-        if (braw != null) warnings.push(`backup unusable: ${r.error}`);
-        if (r.future) return defaulted(true);
       } catch (e) {
         warnings.push('backup read failed');
         this.onError('backup read failed', e);
       }
     }
+    if (localOk) return adopt(localOk, 'local');
     return defaulted(false);
+  }
+
+  private quarantine(raw: string): void {
+    try {
+      this.local?.setItem(this.key + '.corrupt', raw);
+    } catch {
+      /* best effort */
+    }
+  }
+
+  /**
+   * Flush on pagehide AND on visibilitychange-hidden (iPad Safari often skips pagehide), and adopt a
+   * newer save written by another tab (storage event) instead of overwriting it. Returns an unbind.
+   */
+  bindLifecycle(win: LifecycleTarget): () => void {
+    const flush = () => void this.flush();
+    const doc = win.document;
+    const vis = () => {
+      if (doc?.hidden) flush();
+    };
+    const onStorage = (e: { key: string | null; newValue: string | null }) => {
+      if (e.key !== this.key) return;
+      this.adoptExternal(e.newValue);
+    };
+    win.addEventListener('pagehide', flush);
+    win.addEventListener('storage', onStorage as (e: never) => void);
+    doc?.addEventListener('visibilitychange', vis);
+    return () => {
+      win.removeEventListener('pagehide', flush);
+      win.removeEventListener('storage', onStorage as (e: never) => void);
+      doc?.removeEventListener('visibilitychange', vis);
+    };
+  }
+
+  /** A write from another tab arrived: adopt it if it is newer than ours. Returns true if adopted. */
+  adoptExternal(raw: string | null): boolean {
+    if (this.readOnly || raw === null) return false;
+    const r = this.parse(raw);
+    if (!r.state) return false;
+    if (Date.parse(r.state.updatedAt) <= Date.parse(this.state.updatedAt)) return false;
+    this.state = r.state;
+    for (const l of this.listeners) l(this.state);
+    this.onExternalChange?.(this.state);
+    return true;
   }
 
   /** Write now. Never throws; failures are reported in the result. */

@@ -10,3 +10,4 @@
 - `save`: localStorage primary + idb-keyval backup, key `tikshuv.cf.save`; newer-version saves load read-only so data is never overwritten; spec checksum/.bak rotation skipped for now.
 - `dialogue`: check score = voice level + modifiers + 1 per linked evidence; white retryable, red once; moods neutral/worried/relieved/sly; lint CLI `node packages/dialogue/src/cli.ts <scene|dir>`.
 - `audio`: master muted on first run (needs a "sound on" prompt); synth fallback for every cue; Flow asset names listed in packages/audio/README.md.
+- 2026-11-02 M2 review: blackout deferral (spec 02 8.2) is game-side: listen for `blackout` and hold until the beat ends. Event log/storageHealth (spec 01 3.6) deferred to M4. `_extra` key preservation skipped. Case unlock follows the literal spec 03 text (both own units; Case 1 after the prologue); revisit if content intends U2 to open Case 2.

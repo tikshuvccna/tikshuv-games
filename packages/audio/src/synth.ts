@@ -1,4 +1,4 @@
-import type { ABuffer, AContextLike, ANode, SfxName } from './types';
+import type { ABuffer, AContextLike, ANode, SfxName } from './types.js';
 
 /** Procedural fallbacks: every SFX works with zero assets. Each returns its duration in seconds. */
 type Voice = (c: AContextLike, out: ANode, t: number) => number;
@@ -54,38 +54,68 @@ export const SYNTH_SFX: Record<SfxName, Voice> = {
   },
   'check-fail': (c, o, t) => { tone(c, o, t, 'sine', 140, 40, 0.3, 0.6); tone(c, o, t + 0.05, 'sawtooth', 196, 130, 0.35, 0.15); return 0.45; },
   blackout: (c, o, t) => { tone(c, o, t, 'sawtooth', 600, 30, 1.4, 0.35); noise(c, o, t, 'lowpass', 4000, 80, 1.4, 0.3); return 1.5; },
+  // addendum 04 stingers
+  'level-up': (c, o, t) => {
+    [392, 523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, t + i * 0.07, 'triangle', f, f * 1.01, 0.5, 0.22));
+    tone(c, o, t, 'sine', 196, 392, 0.9, 0.2);
+    return 0.9;
+  },
+  sparkle: (c, o, t) => {
+    [2093, 2637, 3136, 2349].forEach((f, i) => tone(c, o, t + i * 0.05, 'sine', f, f, 0.16, 0.14));
+    return 0.4;
+  },
+  whoosh: (c, o, t) => { noise(c, o, t, 'bandpass', 400, 3200, 0.5, 0.4, 0.8); return 0.55; },
 };
 
 /** Stingers that duck the music (-35 percent per spec 04 section 6.2). */
 export const DUCKING: Partial<Record<SfxName, true>> = {
-  stamp: true, notification: true, 'check-pass': true, 'check-fail': true, blackout: true,
+  stamp: true, notification: true, 'check-pass': true, 'check-fail': true, blackout: true, 'level-up': true,
 };
 export const BUS_FOR_SFX: Record<SfxName, 'ui' | 'sfx'> = {
   click: 'ui', confirm: 'ui', deny: 'ui', typewriter: 'ui', notification: 'ui',
   stamp: 'sfx', paper: 'sfx', 'check-pass': 'sfx', 'check-fail': 'sfx', blackout: 'sfx',
+  'level-up': 'sfx', sparkle: 'sfx', whoosh: 'sfx',
 };
 
-/** Synth music pad fallback: sustained chord. Returns a stop function. */
-export function synthPad(c: AContextLike, out: ANode, rootHz: number, chord: readonly number[], t: number): () => void {
+/** A looping source that can be stopped at a scheduled time and tells us when it has ended. */
+export interface Stoppable {
+  stop(when?: number): void;
+  onStopped(cb: () => void): void;
+}
+
+/** Synth music pad fallback: sustained chord. */
+export function synthPad(c: AContextLike, out: ANode, rootHz: number, chord: readonly number[], t: number): Stoppable {
   const oscs = chord.map((semi) => {
     const o = c.createOscillator(); const g = c.createGain();
     o.type = 'triangle';
     o.frequency.setValueAtTime(rootHz * Math.pow(2, semi / 12), t);
     g.gain.setValueAtTime(0.5 / chord.length, t);
     o.connect(g); g.connect(out); o.start(t);
-    return o;
+    return { o, g };
   });
-  return () => oscs.forEach((o) => o.stop());
+  return {
+    stop: (when) => oscs.forEach(({ o }) => o.stop(when)),
+    onStopped: (cb) => {
+      let left = oscs.length;
+      if (left === 0) return cb();
+      oscs.forEach(({ o, g }) => {
+        o.onended = () => { g.disconnect(); if (--left === 0) cb(); };
+      });
+    },
+  };
 }
 
 /** Ambience fallback: looping filtered noise. */
-export function synthAmbience(c: AContextLike, out: ANode, id: string, t: number): () => void {
+export function synthAmbience(c: AContextLike, out: ANode, id: string, t: number): Stoppable {
   const s = c.createBufferSource(); const f = c.createBiquadFilter(); const g = c.createGain();
   s.buffer = noiseBuffer(c); s.loop = true;
   const rain = id.includes('rain');
   f.type = rain ? 'highpass' : 'lowpass';
-  f.frequency.setValueAtTime(rain ? 3500 : id.includes('server') ? 220 : 500, t);
+  f.frequency.setValueAtTime(rain ? 3500 : id.includes('server') ? 220 : id.includes('harbour') ? 320 : 500, t);
   g.gain.setValueAtTime(rain ? 0.25 : 0.4, t);
   s.connect(f); f.connect(g); g.connect(out); s.start(t);
-  return () => s.stop();
+  return {
+    stop: (when) => s.stop(when),
+    onStopped: (cb) => { s.onended = () => { g.disconnect(); cb(); }; },
+  };
 }
