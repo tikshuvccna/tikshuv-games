@@ -11,7 +11,8 @@
     "build": "npm -w games/case-files run build",
     "preview": "npm -w games/case-files run preview",
     "typecheck": "tsc -b",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:site": "node tools/build-site.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
