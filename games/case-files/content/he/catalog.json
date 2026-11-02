@@ -1,0 +1,31 @@
+{
+  "cases": [
+    { "id": "prologue", "num": 0, "title": "יום ראשון בלשכה", "hook": "להכיר את המשרד, לפתוח את ארון המחשבות ולבדוק מעטפה אחת.", "place": "חדר התדריכים", "units": [], "scene": "p00_demo", "playable": true },
+    { "id": "case1", "num": 1, "title": "המתג ששכח", "hook": "מתג מציף את הרשת. מי משקר לגבי כתובת ה־<ltr>MAC</ltr> שלו?", "place": "בית דפוס", "units": ["u01_frame_mac", "u02_switch_table"] },
+    { "id": "case2", "num": 2, "title": "אותה רשת?", "hook": "שני משרדים לא רואים זה את זה. מסכה ושער ברירת מחדל.", "place": "משרד הנמל", "units": ["u03_ipv4_mask", "u04_gateway"] },
+    { "id": "case3", "num": 3, "title": "המדפסת וה-MAC", "hook": "בטבלת <ltr>ARP</ltr> יש למדפסת שתי כתובות, ופינג אחד נעצר בצעד השלישי.", "place": "חדר הכבלים", "units": ["u05_arp", "u06_icmp"] },
+    { "id": "case4", "num": 4, "title": "חדר הקונסול", "hook": "ארון נתבים נעול, כבלים וזיכרונות, ומצבי עבודה של <ltr>IOS</ltr>.", "place": "אגף הספרייה", "units": ["u07_cisco_access", "u08_ios_modes"] },
+    { "id": "case5", "num": 5, "title": "הגדרה שנעלמה", "hook": "אחרי הפסקת חשמל ההגדרות נעלמו. פקודות <ltr>show</ltr> יספרו למה.", "place": "המגדלור", "units": ["u09_basic_config", "u10_ip_show"] },
+    { "id": "finale", "num": 6, "title": "התיק האחרון", "hook": "הפסקת חשמל בכל הבניין. כל מה שלמדתם נדרש בבת אחת.", "place": "גג המשרד", "units": [], "finale": true }
+  ],
+  "units": {
+    "u01_frame_mac": { "title": "המסגרת וכתובת ה-MAC" },
+    "u02_switch_table": { "title": "המתג וטבלת ה-MAC" },
+    "u03_ipv4_mask": { "title": "כתובת IPv4 ומסכת רשת" },
+    "u04_gateway": { "title": "נתב ושער ברירת מחדל" },
+    "u05_arp": { "title": "פרוטוקול ARP" },
+    "u06_icmp": { "title": "ICMP: ping ו-tracert" },
+    "u07_cisco_access": { "title": "ציוד סיסקו: זיכרונות וחיבור" },
+    "u08_ios_modes": { "title": "מערכת IOS: מצבי עבודה" },
+    "u09_basic_config": { "title": "הגדרות בסיס ושמירה" },
+    "u10_ip_show": { "title": "IP, SVI ופקודות show" }
+  },
+  "voices": {
+    "logic": "חישובי כתובות, סתירות בעדויות ומסקנות מתוך ראיות.",
+    "packet_sense": "תחושה של זרימת חבילות: ARP, ICMP ולאן הגיעה החבילה.",
+    "patience": "שיטה, סדר פעולות וזהירות לפני קפיצה למסקנות.",
+    "suspicion": "זיהוי שקרים קטנים, כתובות כפולות והתקנים חשודים.",
+    "recall": "הגדרות, פקודות ותיקים קודמים. שומר על ידע ישן.",
+    "command_line": "פקודות של IOS ושל Windows, בקצרה ובמדויק."
+  }
+}

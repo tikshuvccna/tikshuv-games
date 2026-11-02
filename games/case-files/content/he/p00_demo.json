@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "id": "p00_demo",
+  "location": "bureau",
+  "mood": "mood_hub_first_day",
+  "music": "mus_bureau",
+  "speakers": {
+    "rishon": { "nameKey": "cast.rishon", "portrait": "p_rishon" }
+  },
+  "start": "n1",
+  "nodes": [
+    { "id": "n1", "type": "narration", "text": "גשם על חלונות הלשכה. על השולחן מונחת מעטפה אחת, בלי שם שולח.", "next": "n2" },
+    { "id": "n2", "type": "line", "speaker": "rishon", "mood": "relieved", "text": "בוקר טוב, {name}. אני ראשון. היום הוא היום האחרון שלי, והראשון שלכם.", "next": "n3" },
+    { "id": "n3", "type": "line", "speaker": "rishon", "mood": "worried", "text": "המעטפה הזאת הגיעה בלי שולח. בלי שולח אי אפשר להשיב. בואו נבדוק אותה.", "next": "n4" },
+    {
+      "id": "n4", "type": "choice",
+      "options": [
+        { "text": "לבדוק את המעטפה מקרוב.", "next": "n5" },
+        { "text": "לנחש מי שלח אותה.", "next": "n6" }
+      ]
+    },
+    { "id": "n5", "type": "inspect", "evidenceId": "ev_p_envelope", "next": "n6" },
+    {
+      "id": "n6", "type": "check", "voice": "logic", "color": "white", "target": 2,
+      "evidence": ["ev_p_envelope"], "tags": ["sender"], "onBail": "n4", "onPass": "n7", "onFail": "n8"
+    },
+    { "id": "n7", "type": "thought", "thoughtId": "th_who_sends", "next": "n7b" },
+    { "id": "n7b", "type": "line", "speaker": "rishon", "mood": "sly", "text": "נכון. אין שולח, אין תשובה. כל חבילה מתחילה בשאלה: מי שולח, ולמי?", "next": "n9" },
+    { "id": "n8", "type": "line", "speaker": "rishon", "mood": "worried", "text": "ניחוש הוא לא ראיה, {name}. נסו שוב, והפעם עם הכלים שיש על השולחן.", "next": "n4" },
+    { "id": "n9", "type": "end", "result": "solved" }
+  ]
+}

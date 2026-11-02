@@ -1,0 +1,59 @@
+{
+  "places": {
+    "bureau": {
+      "title": "חדר התדריכים",
+      "mood": "bureau",
+      "hotspots": [
+        { "id": "h_envelope", "x": 30, "y": 66, "label": "מעטפה", "icon": "evidence", "evidenceId": "ev_p_envelope" },
+        { "id": "h_stamp", "x": 62, "y": 60, "label": "חותמת דואר", "icon": "stamp", "evidenceId": "ev_p_stamp" },
+        { "id": "h_lamp", "x": 84, "y": 36, "label": "מנורת שולחן", "icon": "hint", "note": "המנורה דולקת כל הלילה. אין בה שום רמז, רק נעים לידה." },
+        { "id": "h_clock", "x": 14, "y": 30, "label": "שעון הקיר", "icon": "watch", "note": "השעון מתקתק. כשהוא מצלצל, היום הסתיים ונמשיך מחר." }
+      ]
+    },
+    "print_shop": {
+      "title": "בית הדפוס",
+      "mood": "investigate",
+      "hotspots": [
+        { "id": "h_printer", "x": 34, "y": 58, "label": "מדפסת", "icon": "evidence", "evidenceId": "ev_c1_table" },
+        { "id": "h_cable", "x": 72, "y": 74, "label": "כבל", "icon": "evidence", "note": "כבל רשת תקין. לא הוא האשם הפעם." }
+      ]
+    }
+  },
+  "evidence": {
+    "ev_p_envelope": { "title": "מעטפה בלי שולח", "body": "על המעטפה כתובת יעד אחת בלבד. שדה השולח ריק, ולכן אי אפשר להשיב." },
+    "ev_p_stamp": { "title": "חותמת דואר מטושטשת", "body": "החותמת עברה במשרד הדואר של הנמל. שם אפשר לברר מי הגיש את המעטפה." },
+    "ev_c1_table": { "title": "טבלת הכתובות של המתג", "body": "בטבלה אותה כתובת <ltr>MAC</ltr> מופיעה בשתי יציאות. אחת מהן בוודאי מזויפת." }
+  },
+  "deductions": {
+    "d_p_no_sender": { "title": "אי אפשר להשיב לבלי שולח", "text": "לחבילה בלי כתובת שולח אין לאן לחזור. התשובה נעצרת לפני שהתחילה.", "requires": ["ev_p_envelope"] },
+    "d_p_ask_post": { "title": "משרד הדואר יודע", "text": "המעטפה עברה בנמל, אז מי שהגיש אותה רשום אצלם. כדאי לשאול שם.", "requires": ["ev_p_envelope", "ev_p_stamp"] },
+    "d_c1_one_port": { "title": "כתובת אחת, יציאה אחת", "text": "כתובת <ltr>MAC</ltr> אמורה להופיע ביציאה אחת. כפילות היא סימן לבעיה.", "requires": ["ev_c1_table", "ev_p_envelope"] }
+  },
+  "thoughts": {
+    "th_who_sends": {
+      "title": "מי שולח, ולמי?", "kind": "concept", "minutes": 3, "tags": ["sender"],
+      "body": "כל חבילה נושאת שתי כתובות: של מי ששלח ושל מי שאמור לקבל. בלי שתיהן אי אפשר לענות.",
+      "apply": { "q": "חבילה הגיעה בלי כתובת שולח. מה אי אפשר לעשות?", "options": ["לקרוא את התוכן", "לשלוח תשובה", "להחזיר למשרד הדואר"], "answer": 1 }
+    },
+    "th_mac_vs_ip": {
+      "title": "<ltr>MAC</ltr> או <ltr>IP</ltr>", "kind": "concept", "minutes": 6, "tags": ["mac", "ip"],
+      "body": "כתובת <ltr>MAC</ltr> שייכת לכרטיס ונשארת איתו. כתובת <ltr>IP</ltr> שייכת לרשת ויכולה להשתנות.",
+      "apply": { "q": "איזו כתובת נשארת צמודה לכרטיס הרשת?", "options": ["<ltr>IP</ltr>", "<ltr>MAC</ltr>", "שם המחשב"], "answer": 1 }
+    },
+    "th_one_label": {
+      "title": "תווית אחת, בעלים אחד", "kind": "concept", "minutes": 3, "tags": ["duplicate"],
+      "body": "אם שני מכשירים טוענים לאותה כתובת, אחד מהם טועה. בודקים מי קיבל אותה קודם.",
+      "apply": { "q": "שני מכשירים משתמשים באותה כתובת <ltr>IP</ltr>. מה נבדוק?", "options": ["מי הגדיר אותה ידנית", "את צבע הכבל", "את שעת היום"], "answer": 0 }
+    }
+  },
+  "codex": [
+    { "id": "ip", "term": "כתובת IP", "en": "IP address", "unit": "u03_ipv4_mask", "unlock": "start", "def": "מספר שמזהה מכשיר ברשת, למשל <ltr>192.168.1.20</ltr>. מורכב מארבע קבוצות של מספרים." },
+    { "id": "mac", "term": "כתובת MAC", "en": "MAC address", "unit": "u01_frame_mac", "unlock": "ev_p_envelope", "def": "כתובת פיזית של כרטיס רשת, למשל <ltr>00-1A-2B-3C-4D-5E</ltr>. נקבעת במפעל." },
+    { "id": "frame", "term": "מסגרת", "en": "Frame", "unit": "u01_frame_mac", "unlock": "th_who_sends", "def": "היחידה שנשלחת על הכבל. נושאת כתובת שולח, כתובת יעד ומידע." },
+    { "id": "switch", "term": "מתג", "en": "Switch", "unit": "u02_switch_table", "unlock": "ev_c1_table", "def": "מכשיר שלומד איזו כתובת <ltr>MAC</ltr> נמצאת בכל יציאה, ושולח מסגרות רק לשם." },
+    { "id": "gateway", "term": "שער ברירת מחדל", "en": "Default gateway", "unit": "u04_gateway", "unlock": "locked", "def": "הנתב שאליו פונים כשהיעד נמצא מחוץ לרשת המקומית." },
+    { "id": "arp", "term": "פרוטוקול ARP", "en": "ARP", "unit": "u05_arp", "unlock": "locked", "def": "שאלה בשידור: מי כאן מחזיק בכתובת <ltr>IP</ltr> הזאת? התשובה היא כתובת <ltr>MAC</ltr>." },
+    { "id": "icmp", "term": "ICMP", "en": "ICMP", "unit": "u06_icmp", "unlock": "locked", "def": "פרוטוקול הודעות בקרה. <ltr>ping</ltr> ו־<ltr>tracert</ltr> נשענים עליו." },
+    { "id": "ios", "term": "מערכת IOS", "en": "Cisco IOS", "unit": "u08_ios_modes", "unlock": "locked", "def": "מערכת ההפעלה של ציוד סיסקו, עם מצבי עבודה כמו <ltr>user</ltr> ו־<ltr>privileged</ltr>." }
+  ]
+}
