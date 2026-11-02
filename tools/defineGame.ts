@@ -5,6 +5,8 @@ import { readdirSync, existsSync } from 'node:fs';
 export interface DefineGameOptions {
   id: string;
   root: string;
+  /** Extra HTML entry points relative to root (e.g. 'design-system.html'); index.html is always built. */
+  pages?: string[];
   extra?: UserConfig;
 }
 
@@ -30,6 +32,15 @@ export function defineGame(o: DefineGameOptions) {
       sourcemap: false,
       assetsInlineLimit: 4096,
       chunkSizeWarningLimit: 250,
+      ...(o.pages?.length
+        ? {
+            rolldownOptions: {
+              input: Object.fromEntries(
+                ['index.html', ...o.pages].map((p) => [p.replace(/\.html$/, ''), resolve(o.root, p)]),
+              ),
+            },
+          }
+        : {}),
     },
     ...o.extra,
   });

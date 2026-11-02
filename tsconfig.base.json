@@ -7,6 +7,7 @@
     "moduleResolution": "bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "noEmit": true,
     "types": ["node"]
   }

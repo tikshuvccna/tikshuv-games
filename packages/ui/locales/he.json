@@ -1,0 +1,22 @@
+{
+  "tk.close": "סגירה",
+  "tk.continue": "המשיכו",
+  "tk.skip": "דלגו על ההקלדה",
+  "tk.dismiss": "סגירת ההודעה",
+  "tk.notifications": "הודעות",
+  "tk.of": "מתוך",
+  "tk.level": "רמה",
+  "tk.voice.muted": "הקול הזה עוד לא מפותח",
+  "voice.logic": "היגיון",
+  "voice.packet_sense": "חוש חבילות",
+  "voice.patience": "סבלנות",
+  "voice.suspicion": "חשדנות",
+  "voice.recall": "זיכרון",
+  "voice.command_line": "שורת פקודה",
+  "voice.level.0": "מושתק",
+  "voice.level.1": "מתחיל",
+  "voice.level.2": "מתאמן",
+  "voice.level.3": "מקצועי",
+  "voice.level.4": "מומחה",
+  "voice.level.5": "אגדי"
+}

@@ -1,0 +1,180 @@
+/*
+ * @tikshuv/ui tokens - Case Files design system (task O1).
+ * Palette lock: specs/case-files/02 section 3.2 (binding). Mirror: ./palette.json (a test keeps them in sync).
+ * Rule: colours in CSS/SVG come ONLY from --cf-* tokens. color-mix() of a token with `transparent`
+ * is allowed for overlays, glows and hairlines, never for text.
+ * Dark theme only. Direction-agnostic: components use logical properties (inline/block).
+ */
+
+:root {
+  /* ---- 1. Palette lock: 12 base ---- */
+  --cf-ink: #14161C;
+  --cf-night: #1F2430;
+  --cf-slate: #2F3A4C;
+  --cf-fog: #8A97A8;
+  --cf-paper: #EDE3CF;
+  --cf-brass: #C79A3B;
+  --cf-amber: #E8A33D;
+  --cf-teal: #2FA8A0;
+  --cf-blue: #4F86C6;
+  --cf-rust: #B5543A;
+  --cf-olive: #7C8B4A;
+  --cf-phosphor: #7BE38E;
+
+  /* ---- 1b. Dither tints (12, total lock = 24) ---- */
+  --cf-brass-deep: #7B6536;
+  --cf-brass-light: #D8BB7E;
+  --cf-amber-deep: #8E6A37;
+  --cf-amber-light: #EAC07F;
+  --cf-teal-deep: #286D6E;
+  --cf-teal-light: #85C3B5;
+  --cf-blue-deep: #395A83;
+  --cf-blue-light: #96B0CA;
+  --cf-rust-deep: #723E36;
+  --cf-rust-light: #CE947D;
+  --cf-fog-light: #B7B9BA;
+  --cf-phosphor-deep: #528D64;
+
+  /* ---- 2. Semantic roles (use these in components, not raw palette) ---- */
+  --tk-bg: var(--cf-night);
+  --tk-bg-deep: var(--cf-ink);
+  --tk-surface: var(--cf-slate);
+  --tk-surface-paper: var(--cf-paper);
+  --tk-text: var(--cf-paper);              /* on night/slate/ink */
+  --tk-text-muted: var(--cf-fog);          /* on night/ink only (5.2:1) */
+  --tk-text-muted-on-slate: var(--cf-fog-light); /* 5.8:1 */
+  --tk-text-on-paper: var(--cf-ink);
+  --tk-text-muted-on-paper: var(--cf-slate);
+  --tk-text-on-accent: var(--cf-ink);      /* on brass/amber/teal */
+  --tk-accent: var(--cf-brass);
+  --tk-link: var(--cf-blue-light);
+  --tk-link-on-paper: var(--cf-blue-deep);
+  --tk-success: var(--cf-teal);
+  --tk-success-text: var(--cf-teal-light);
+  --tk-warn: var(--cf-amber);
+  --tk-danger: var(--cf-rust);
+  --tk-danger-text: var(--cf-rust-light);  /* on dark */
+  --tk-danger-text-on-paper: var(--cf-rust-deep);
+  --tk-border: color-mix(in srgb, var(--cf-fog) 38%, transparent);
+  --tk-border-strong: var(--cf-fog);
+  --tk-hairline-brass: color-mix(in srgb, var(--cf-brass) 55%, transparent);
+  --tk-focus: var(--cf-amber);
+  --tk-focus-halo: var(--cf-ink);
+
+  /* Voice accents (02 section 2.4). *-fill = pips, borders, sigils (>= 3:1 on ink). Text is always paper. */
+  --tk-voice-logic: var(--cf-blue);
+  --tk-voice-packet_sense: var(--cf-teal);
+  --tk-voice-patience: var(--cf-amber);
+  --tk-voice-suspicion: var(--cf-rust);
+  --tk-voice-recall: var(--cf-olive);
+  --tk-voice-command_line: var(--cf-phosphor);
+
+  /* ---- 3. Typography ---- */
+  /* Heebo is the pick (OFL); self-hosted WOFF2 subset lands with the font task. Stack degrades to system Hebrew fonts. */
+  --tk-font-sans: "Heebo", "Assistant", "Rubik", "Segoe UI", "Arial Hebrew", "Noto Sans Hebrew", system-ui, Arial, sans-serif;
+  --tk-font-mono: ui-monospace, "Cascadia Mono", "Cascadia Code", Consolas, "SFMono-Regular", Menlo, "Liberation Mono", monospace;
+  /* Typewriter face for stamps, case labels and memos (Courier New ships Hebrew glyphs on Windows/macOS). */
+  --tk-font-type: "Courier Prime", "Courier New", "Nimbus Mono PS", var(--tk-font-mono);
+
+  --tk-text-base: 18px;                    /* 02 section 3.3: 18 desktop, 17 phone */
+  --tk-text-xs: 0.75rem;                   /* 13.5px: meta only, never body */
+  --tk-text-sm: 0.875rem;
+  --tk-text-md: 1rem;
+  --tk-text-lg: 1.25rem;
+  --tk-text-xl: 1.5625rem;
+  --tk-text-2xl: 1.953rem;
+  --tk-text-3xl: 2.441rem;                 /* major third 1.25 */
+  --tk-leading-tight: 1.2;
+  --tk-leading: 1.55;                      /* Hebrew needs generous leading */
+  --tk-weight-regular: 400;
+  --tk-weight-medium: 500;
+  --tk-weight-bold: 700;
+  --tk-weight-black: 800;
+  --tk-tracking-label: 0.06em;
+
+  /* ---- 4. Space (4px grid), size, radius ---- */
+  --tk-space-1: 4px;
+  --tk-space-2: 8px;
+  --tk-space-3: 12px;
+  --tk-space-4: 16px;
+  --tk-space-5: 24px;
+  --tk-space-6: 32px;
+  --tk-space-7: 48px;
+  --tk-space-8: 64px;
+  --tk-gutter: 16px;                       /* phone side gutter */
+  --tk-target: 44px;                       /* minimum tap target */
+  --tk-target-lg: 56px;                    /* quiz answers on phone */
+  --tk-measure: 62ch;                      /* readable line length */
+  --tk-bubble-max: 46rem;
+
+  --tk-radius-xs: 2px;                     /* paper: cards, stamps (paper does not round) */
+  --tk-radius-sm: 4px;                     /* buttons, inputs */
+  --tk-radius-md: 8px;                     /* panels, dialogue boxes */
+  --tk-radius-lg: 14px;                    /* sheets, dialogs */
+  --tk-radius-pill: 999px;
+
+  --tk-hairline: 1px;
+  --tk-rule: 2px;
+
+  /* ---- 5. Elevation (ink shadows only, never black) ---- */
+  --tk-shadow-1: 0 1px 0 color-mix(in srgb, var(--cf-ink) 60%, transparent), 0 2px 6px color-mix(in srgb, var(--cf-ink) 45%, transparent);
+  --tk-shadow-paper: 0 1px 1px color-mix(in srgb, var(--cf-ink) 50%, transparent), 0 6px 14px -4px color-mix(in srgb, var(--cf-ink) 70%, transparent), 0 18px 34px -18px color-mix(in srgb, var(--cf-ink) 80%, transparent);
+  --tk-shadow-lift: 0 2px 2px color-mix(in srgb, var(--cf-ink) 50%, transparent), 0 16px 40px -8px color-mix(in srgb, var(--cf-ink) 85%, transparent);
+  --tk-shadow-inset: inset 0 2px 10px color-mix(in srgb, var(--cf-ink) 85%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--cf-ink) 90%, transparent);
+  --tk-bevel-brass: inset 0 1px 0 color-mix(in srgb, var(--cf-brass-light) 80%, transparent), inset 0 -2px 0 color-mix(in srgb, var(--cf-brass-deep) 85%, transparent);
+  --tk-glow-amber: 0 0 24px -4px color-mix(in srgb, var(--cf-amber) 55%, transparent);
+  --tk-glow-phosphor: 0 0 18px -6px color-mix(in srgb, var(--cf-phosphor) 60%, transparent);
+
+  /* ---- 6. Motion (02 section 3.4: calm, 150-250ms ease-out, no flashing) ---- */
+  --tk-dur-press: 90ms;
+  --tk-dur-fast: 150ms;
+  --tk-dur-base: 200ms;
+  --tk-dur-slow: 250ms;
+  --tk-dur-page: 360ms;                    /* page turn (Thought Cabinet) */
+  --tk-dur-stamp: 420ms;                   /* stamp thunk */
+  --tk-dur-toast: 4500ms;                  /* on-screen time */
+  --tk-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --tk-ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
+  --tk-ease-stamp: cubic-bezier(0.3, 1.5, 0.5, 1); /* overshoot 1.3 -> 1 */
+  --tk-typewriter-cps: 40;                 /* unitless, read by tkBubble */
+  --tk-slide: 8px;                         /* screen transition offset (from inline-start in RTL = right) */
+
+  /* ---- 7. Texture ---- */
+  --tk-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .078 0 0 0 0 .086 0 0 0 0 .11 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --tk-grain-opacity: 0.07;
+
+  /* ---- 8. Mood grade (default: bureau) - set data-mood on a scene root ---- */
+  --tk-mood-light: var(--cf-amber);        /* the ONE saturated accent of the scene */
+  --tk-mood-shadow: var(--cf-ink);
+  --tk-mood-vignette: 0.55;
+  --tk-mood-tempo: 1;                      /* multiplies durations in mood-aware animations */
+
+  color-scheme: dark;
+  /* rem = the game's base size, so the whole scale follows the S/M/L text-size setting (override --tk-text-base). */
+  font-size: var(--tk-text-base);
+}
+
+@media (max-width: 600px) {
+  :root { --tk-text-base: 17px; }
+}
+
+/* Moods (04 addendum: every scene declares a mood id that drives music, ambience, colour grade, motion). */
+[data-mood="bureau"]      { --tk-mood-light: var(--cf-amber);    --tk-mood-vignette: 0.55; --tk-mood-tempo: 1; }
+[data-mood="investigate"] { --tk-mood-light: var(--cf-teal);     --tk-mood-vignette: 0.65; --tk-mood-tempo: 0.9; }
+[data-mood="terminal"]    { --tk-mood-light: var(--cf-phosphor); --tk-mood-vignette: 0.7;  --tk-mood-tempo: 0.85; }
+[data-mood="deduction"]   { --tk-mood-light: var(--cf-brass);    --tk-mood-vignette: 0.75; --tk-mood-tempo: 1.15; }
+[data-mood="suspicion"]   { --tk-mood-light: var(--cf-rust);     --tk-mood-vignette: 0.7;  --tk-mood-tempo: 1; }
+[data-mood="solved"]      { --tk-mood-light: var(--cf-amber-light); --tk-mood-vignette: 0.35; --tk-mood-tempo: 1.2; }
+[data-mood="blackout"]    { --tk-mood-light: var(--cf-fog);      --tk-mood-vignette: 0.9;  --tk-mood-tempo: 1.4; }
+
+/* Reduced motion: OS setting or the in-game "calm" toggle (data-calm on <html>). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --tk-dur-press: 0.01ms; --tk-dur-fast: 0.01ms; --tk-dur-base: 0.01ms; --tk-dur-slow: 0.01ms;
+    --tk-dur-page: 0.01ms; --tk-dur-stamp: 0.01ms; --tk-slide: 0px; --tk-typewriter-cps: 0;
+  }
+}
+:root[data-calm] {
+  --tk-dur-press: 0.01ms; --tk-dur-fast: 0.01ms; --tk-dur-base: 0.01ms; --tk-dur-slow: 0.01ms;
+  --tk-dur-page: 0.01ms; --tk-dur-stamp: 0.01ms; --tk-slide: 0px; --tk-typewriter-cps: 0;
+}

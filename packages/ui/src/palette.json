@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "case-files-palette-lock",
+  "source": "specs/case-files/02_case_files_game_design.md section 3.2 (binding); tints resolved by O1",
+  "notes": [
+    "12 base colours are binding and must not change without a spec update.",
+    "Spec 02 asks for two tints per colour; spec 05 caps the dither palette at 24. Resolution: the five accents that carry most raster light (brass, amber, teal, blue, rust) get a deep tint (45% toward night) and a light tint (45% toward paper); fog gets a light tint (UI-critical: secondary text on slate); phosphor gets a deep tint (dim terminal text). The five neutrals already form their own ramp, olive dithers against night.",
+    "quantise is the exact ordered list the palette-lock script (tools/art/palette-lock.mjs) uses. 24 entries.",
+    "CSS consumes these through --cf-* custom properties in packages/ui/src/tokens.css; a vitest test keeps the two in sync."
+  ],
+  "base": {
+    "ink":      { "hex": "#14161C", "use": "deepest shadows, text on light" },
+    "night":    { "hex": "#1F2430", "use": "page background, panels" },
+    "slate":    { "hex": "#2F3A4C", "use": "cards, dialogue boxes" },
+    "fog":      { "hex": "#8A97A8", "use": "secondary text on night/ink, borders" },
+    "paper":    { "hex": "#EDE3CF", "use": "paper cards, light panels, main text on dark" },
+    "brass":    { "hex": "#C79A3B", "use": "primary accent, buttons, prizes" },
+    "amber":    { "hex": "#E8A33D", "use": "lamps, warnings, Patience, focus ring" },
+    "teal":     { "hex": "#2FA8A0", "use": "Packet Sense, success" },
+    "blue":     { "hex": "#4F86C6", "use": "Logic, links" },
+    "rust":     { "hex": "#B5543A", "use": "Suspicion, red checks, errors" },
+    "olive":    { "hex": "#7C8B4A", "use": "Recall" },
+    "phosphor": { "hex": "#7BE38E", "use": "terminal text, Command Line" }
+  },
+  "tints": {
+    "brass-deep":    { "hex": "#7B6536", "of": "brass" },
+    "brass-light":   { "hex": "#D8BB7E", "of": "brass" },
+    "amber-deep":    { "hex": "#8E6A37", "of": "amber" },
+    "amber-light":   { "hex": "#EAC07F", "of": "amber" },
+    "teal-deep":     { "hex": "#286D6E", "of": "teal" },
+    "teal-light":    { "hex": "#85C3B5", "of": "teal" },
+    "blue-deep":     { "hex": "#395A83", "of": "blue" },
+    "blue-light":    { "hex": "#96B0CA", "of": "blue" },
+    "rust-deep":     { "hex": "#723E36", "of": "rust" },
+    "rust-light":    { "hex": "#CE947D", "of": "rust" },
+    "fog-light":     { "hex": "#B7B9BA", "of": "fog" },
+    "phosphor-deep": { "hex": "#528D64", "of": "phosphor" }
+  },
+  "quantise": [
+    "#14161C", "#1F2430", "#2F3A4C", "#8A97A8", "#B7B9BA", "#EDE3CF",
+    "#7B6536", "#C79A3B", "#D8BB7E",
+    "#8E6A37", "#E8A33D", "#EAC07F",
+    "#286D6E", "#2FA8A0", "#85C3B5",
+    "#395A83", "#4F86C6", "#96B0CA",
+    "#723E36", "#B5543A", "#CE947D",
+    "#7C8B4A",
+    "#528D64", "#7BE38E"
+  ],
+  "gradeRamp": {
+    "note": "Spec 04 step 3: luminance mapped through ink-blue -> mid teal-grey -> warm cream, blended 60% over the original.",
+    "stops": ["#1F2430", "#2F3A4C", "#EDE3CF"],
+    "blend": 0.6
+  },
+  "contrast": {
+    "note": "WCAG 2.x ratios, computed. AA body text needs 4.5, large text (24px, or 18.66px bold) and non-text UI need 3.0.",
+    "approvedText": [
+      ["paper", "night", 12.18], ["paper", "slate", 9.01], ["paper", "ink", 14.2],
+      ["fog", "night", 5.23], ["fog", "ink", 6.09], ["fog-light", "slate", 5.82],
+      ["ink", "paper", 14.2], ["slate", "paper", 9.01], ["ink", "brass", 6.99], ["ink", "amber", 8.39], ["ink", "teal", 6.23],
+      ["paper", "rust-deep", 6.71], ["paper", "blue-deep", 5.56], ["paper", "teal-deep", 4.71],
+      ["rust-deep", "paper", 6.71], ["blue-deep", "paper", 5.56], ["teal-deep", "paper", 4.71],
+      ["rust-light", "night", 6.03], ["blue-light", "night", 6.92], ["teal-light", "slate", 5.72], ["brass-light", "slate", 6.19],
+      ["amber", "night", 7.2], ["teal", "night", 5.34], ["brass", "night", 6.0],
+      ["phosphor", "ink", 11.38], ["phosphor-deep", "ink", 4.61]
+    ],
+    "forbiddenText": [
+      ["fog", "slate", 3.86, "use fog-light"], ["fog", "paper", 2.33, "use slate"],
+      ["rust", "night", 3.17, "use rust-light"], ["blue", "night", 4.11, "use blue-light"],
+      ["olive", "night", 4.17, "olive is fill-only"], ["brass", "paper", 2.03, "use brass-deep, large only"]
+    ]
+  }
+}
